@@ -33,17 +33,18 @@ def filter_words(words):
 class N_Similarity(Resource):
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('ws1', type=str, required=True, help="Word set 1 cannot be blank!", action='append')
-        parser.add_argument('ws2', type=str, required=True, help="Word set 2 cannot be blank!", action='append')
+        parser.add_argument('ws1', type=str, required=True, help="Word set 1 cannot be blank!",  action='append', location='args')
+        parser.add_argument('ws2', type=str, required=True, help="Word set 2 cannot be blank!",  action='append', location='args')
         args = parser.parse_args()
+        print (args)
         return model.n_similarity(filter_words(args['ws1']),filter_words(args['ws2'])).item()
 
 
 class Similarity(Resource):
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('w1', type=str, required=True, help="Word 1 cannot be blank!")
-        parser.add_argument('w2', type=str, required=True, help="Word 2 cannot be blank!")
+        parser.add_argument('w1', type=str, required=True, help="Word 1 cannot be blank!", action='append', location='args')
+        parser.add_argument('w2', type=str, required=True, help="Word 2 cannot be blank!", action='append', location='args')
         args = parser.parse_args()
         return model.similarity(args['w1'], args['w2']).item()
 
@@ -53,8 +54,8 @@ class MostSimilar(Resource):
         if (norm == "disable"):
             return "most_similar disabled", 400
         parser = reqparse.RequestParser()
-        parser.add_argument('positive', type=str, required=False, help="Positive words.", action='append')
-        parser.add_argument('negative', type=str, required=False, help="Negative words.", action='append')
+        parser.add_argument('positive', type=str, required=False, help="Positive words.", action='append', location='args')
+        parser.add_argument('negative', type=str, required=False, help="Negative words.", action='append', location='args')
         parser.add_argument('topn', type=int, required=False, help="Number of results.")
         args = parser.parse_args()
         pos = filter_words(args.get('positive', []))
@@ -75,7 +76,7 @@ class MostSimilar(Resource):
 class Model(Resource):
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('word', type=str, required=True, help="word to query.")
+        parser.add_argument('word', type=str, required=True, help="word to query.", location='args')
         args = parser.parse_args()
         try:
             res = model[args['word']]
@@ -128,7 +129,7 @@ if __name__ == '__main__':
         print("Usage: word2vec-apy.py --model path/to/the/model [--host host --port 1234]")
 
     print("Loading model...")
-    model = word2vec.KeyedVectors.load_word2vec_format(model_path, binary=binary)
+    model = word2vec.KeyedVectors.load_word2vec_format(model_path, binary=True)
 
     norm = args.norm if args.norm else "both"
     norm = norm.lower()
